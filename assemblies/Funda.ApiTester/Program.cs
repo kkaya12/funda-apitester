@@ -22,11 +22,12 @@ namespace Funda.ApiTester
             
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddHttpClient();
-            serviceCollection.AddSingleton<IFundaApiClient, FundaApiClient>();
+            serviceCollection.AddSingleton<IFundaApiClient, FundaApiHttpClient>();
             serviceCollection.AddSingleton<IRequestBuilder, RequestBuilder>();
             serviceCollection.AddSingleton<IStaticRequestParametersProvider, StaticRequestParametersProvider>();
             serviceCollection.AddSingleton<IConfiguration>(configuration);
 
+            //TODO: Add factory/strategy to select concrete implementation.
             if (responseContentType.Equals("json", StringComparison.InvariantCultureIgnoreCase) || string.IsNullOrWhiteSpace(args[0]))
             {
                 serviceCollection.AddSingleton<IFundaApiTester, FundaApiTesterJson>();
@@ -92,7 +93,7 @@ namespace Funda.ApiTester
             }
 
             var i = 1;
-            Console.WriteLine($"--Parameters: Region:{region}, With garden: {withGarden} - Top {limit}--");
+            Console.WriteLine($"-- Parameters: Region: {region}, With garden: {withGarden} - Top {limit}--");
             foreach(var item in result)
             {
                 Console.WriteLine($"{i}. Real estate agent {item.Key}, #Listings: {item.Value}");

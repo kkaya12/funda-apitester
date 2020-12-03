@@ -2,8 +2,13 @@
 
 namespace Funda.ApiTester.Client
 {
+    /// <summary>
+    /// HTTP result wrapper that exposes the content as string.
+    /// </summary>
     public class FundaApiResult
     {
+        // Could be extended by API-specific stuff.(TODO: maybe paging handling could be moved here)
+
         public bool IsSuccesss { get; set; }
         public string Content { get; set; }
         public string ErrorMessage { get; set; }

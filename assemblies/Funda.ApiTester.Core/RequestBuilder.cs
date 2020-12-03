@@ -17,7 +17,7 @@ namespace Funda.ApiTester.Core
             _addressBase = requestParametersProvider.GetAddressBase();
         }
 
-        public Uri BuildRequestUri(string region, AdType adType, ResponseContentType contentType, int page, bool withGarden = false)
+        public Uri BuildRequestUri(string region, ListingType listingType, ResponseContentType contentType, int page, bool withGarden = false)
         {
             if (string.IsNullOrWhiteSpace(region)) return null;
             var addressBuilder = new StringBuilder(_addressBase);
@@ -36,12 +36,12 @@ namespace Funda.ApiTester.Core
 
             addressBuilder.Append($"{_apiKey}/?type=");
 
-            switch (adType)
+            switch (listingType)
             {
-                case AdType.Rent:
+                case ListingType.Rent:
                     addressBuilder.Append("huur&zo=/");
                     break;
-                case AdType.Sale:
+                case ListingType.Sale:
                     addressBuilder.Append("koop&zo=/");
                     break;
                 default:

@@ -4,14 +4,15 @@ using System.Threading.Tasks;
 
 namespace Funda.ApiTester.Client
 {
-    public class FundaApiClient : IFundaApiClient
+    public class FundaApiHttpClient : IFundaApiClient
     {
         private HttpClient _httpClient;
-        public FundaApiClient(IHttpClientFactory httpClientFactory)
+        public FundaApiHttpClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory?.CreateClient(nameof(FundaApiClient)) ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _httpClient = httpClientFactory?.CreateClient(nameof(FundaApiHttpClient)) ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
+        ///<inheritdoc cref="IFundaApiClient"/>
         public async Task<FundaApiResult> GetAsync(Uri uri)
         {
             using var httpRequestMessage = new HttpRequestMessage

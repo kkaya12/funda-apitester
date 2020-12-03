@@ -37,7 +37,7 @@ namespace Funda.ApiTester.Core
             if (limit == 0 || string.IsNullOrWhiteSpace(region)) return null;
             var currentPage = 1;
 
-            var requestUri = _requestBuilder.BuildRequestUri(region, AdType.Sale, ResponseContentType.Json, currentPage, withGarden);
+            var requestUri = _requestBuilder.BuildRequestUri(region, ListingType.Sale, ResponseContentType.Json, currentPage, withGarden);
             var result = await _fundaApiClient.GetAsync(requestUri);
 
             var cumulativeResult = ProcessResult(result, out var nextPageAvailable);
@@ -47,7 +47,7 @@ namespace Funda.ApiTester.Core
             while (nextPageAvailable)
             {
                 currentPage++;
-                requestUri = _requestBuilder.BuildRequestUri(region, AdType.Sale, ResponseContentType.Json, currentPage, withGarden);
+                requestUri = _requestBuilder.BuildRequestUri(region, ListingType.Sale, ResponseContentType.Json, currentPage, withGarden);
                 var newResult = await _fundaApiClient.GetAsync(requestUri);
 
                 if (newResult.StatusCode == HttpStatusCode.Unauthorized)

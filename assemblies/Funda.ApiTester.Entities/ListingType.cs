@@ -1,6 +1,6 @@
 ﻿namespace Funda.ApiTester.Entities
 {
-    public enum AdType
+    public enum ListingType
     {
         Rent = 0,
         Sale
