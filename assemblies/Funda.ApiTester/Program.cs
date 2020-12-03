@@ -19,7 +19,8 @@ namespace Funda.ApiTester
                 .AddJsonFile("appsettings.json", true, true)
                 .Build();
             var responseContentType = configuration.GetSection("Response")["ContentType"];
-            
+
+            // TODO: Add logging.
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddHttpClient();
             serviceCollection.AddSingleton<IFundaApiClient, FundaApiHttpClient>();
