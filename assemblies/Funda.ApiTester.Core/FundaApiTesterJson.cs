@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Funda.ApiTester.Core
 {
+    // TODO: Switch to System.Text.Json to eliminate Newtonsoft.Json dependency.
     public class FundaApiTesterJson : IFundaApiTester
     {
         private IFundaApiClient _fundaApiClient;
@@ -37,35 +38,44 @@ namespace Funda.ApiTester.Core
             if (limit == 0 || string.IsNullOrWhiteSpace(region)) return null;
             var currentPage = 1;
 
-            var requestUri = _requestBuilder.BuildRequestUri(region, ListingType.Sale, ResponseContentType.Json, currentPage, withGarden);
-            var result = await _fundaApiClient.GetAsync(requestUri);
-
-            var cumulativeResult = ProcessResult(result, out var nextPageAvailable);
-
-            if (!nextPageAvailable) return cumulativeResult;
-
-            while (nextPageAvailable)
+            try
             {
-                currentPage++;
-                requestUri = _requestBuilder.BuildRequestUri(region, ListingType.Sale, ResponseContentType.Json, currentPage, withGarden);
-                var newResult = await _fundaApiClient.GetAsync(requestUri);
+                var requestUri = _requestBuilder.BuildRequestUri(region, ListingType.Sale, ResponseContentType.Json, currentPage, withGarden);
+                var result = await _fundaApiClient.GetAsync(requestUri);
 
-                if (newResult.StatusCode == HttpStatusCode.Unauthorized)
+                var cumulativeResult = ProcessResult(result, out var nextPageAvailable);
+
+                if (!nextPageAvailable) return cumulativeResult;
+
+                while (nextPageAvailable)
                 {
-                    Thread.Sleep(30000);
-                    currentPage--;
-                    continue;
+                    currentPage++;
+                    requestUri = _requestBuilder.BuildRequestUri(region, ListingType.Sale, ResponseContentType.Json, currentPage, withGarden);
+                    var newResult = await _fundaApiClient.GetAsync(requestUri);
+
+                    if (newResult.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        Thread.Sleep(30000);
+                        currentPage--;
+                        continue;
+                    }
+
+                    var pageResult = ProcessResult(newResult, out nextPageAvailable);
+
+                    if (pageResult == null) return pageResult;
+
+                    cumulativeResult = cumulativeResult.Concat(pageResult).GroupBy(o => o.Key).ToDictionary(o => o.Key, o => o.Sum(v => v.Value));
                 }
 
-                var pageResult = ProcessResult(newResult, out nextPageAvailable);
-
-                if (pageResult == null) return pageResult;
-
-                cumulativeResult = cumulativeResult.Concat(pageResult).GroupBy(o => o.Key).ToDictionary(o => o.Key, o => o.Sum(v => v.Value));
+                var top = cumulativeResult.OrderByDescending(pair => pair.Value).Take(limit);
+                return top.ToDictionary(item => item.Key, item => item.Value);
             }
-
-            var top = cumulativeResult.OrderByDescending(pair => pair.Value).Take(limit);
-            return top.ToDictionary(item => item.Key, item => item.Value);
+            catch (Exception e)
+            {
+                Console.WriteLine($"Caught exception while makine requests. Exception: {e}");
+                return null;
+            }
+            
         }
 
         private Dictionary<RealEstateAgent, int> ProcessResult(FundaApiResult result, out bool nextPageAvailable)
